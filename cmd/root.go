@@ -43,5 +43,6 @@ func init() {
   rootCmd.Flags().StringP("method", "X", "GET", "HTTP method to use: GET or POST. (Default: GET)")
   rootCmd.Flags().StringP("wordlist", "W", "", "Path to the wordlist file.")
   rootCmd.Flags().StringP("headers-file", "H", "", "Path to the headers file.")
+  rootCmd.Flags().IntP("threads", "t", 10, "Number of threads to use for fuzzing.")
   rootCmd.Flags().Bool("use-proxy", false, "Enable proxy configuration from .env file.")
 }

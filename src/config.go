@@ -18,6 +18,7 @@ type Config struct {
   Wordlist      string
   Values        []string
   UseProxy      bool
+  Threads       int
 
   HeadersFile   map[string]string
   HeadersPath   string
@@ -28,6 +29,7 @@ func LoadConfig(cmd *cobra.Command) (Config, error) {
 
   cfg.URL, _ = cmd.Flags().GetString("url")
   cfg.Data, _ = cmd.Flags().GetString("data")
+  cfg.Threads, _ = cmd.Flags().GetInt("threads")
   cfg.Range, _ = cmd.Flags().GetString("range")
   cfg.Method, _ = cmd.Flags().GetString("method")
   cfg.UseProxy, _ = cmd.Flags().GetBool("use-proxy")

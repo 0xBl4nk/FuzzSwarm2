@@ -15,11 +15,16 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) { 
-    config, err := src.LoadConfig(cmd)
+    cfg, err := src.LoadConfig(cmd)
     if err != nil {
       src.LogFatal("Failed to load configuration: %v", err)
     }
-    src.StartFuzzing(config)
+
+    cfg, err = src.ParseConfig(cfg)
+    if err != nil {
+      src.LogFatal("Failed to validate configuration: %v", err)
+    }
+    src.StartFuzzing(cfg)
   },
 }
 
@@ -38,6 +43,5 @@ func init() {
   rootCmd.Flags().StringP("method", "X", "GET", "HTTP method to use: GET or POST. (Default: GET)")
   rootCmd.Flags().StringP("wordlist", "W", "", "Path to the wordlist file.")
   rootCmd.Flags().StringP("headers-file", "H", "", "Path to the headers file.")
+  rootCmd.Flags().Bool("use-proxy", false, "Enable proxy configuration from .env file.")
 }
-
-

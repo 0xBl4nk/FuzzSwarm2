@@ -16,11 +16,11 @@ type Config struct {
   Data          string
   Range         string
   Wordlist      string
-  Value         []string
-  
+  Values        []string
+  UseProxy      bool
+
   HeadersFile   map[string]string
   HeadersPath   string
-
 }
 
 func LoadConfig(cmd *cobra.Command) (Config, error) {
@@ -30,6 +30,7 @@ func LoadConfig(cmd *cobra.Command) (Config, error) {
   cfg.Data, _ = cmd.Flags().GetString("data")
   cfg.Range, _ = cmd.Flags().GetString("range")
   cfg.Method, _ = cmd.Flags().GetString("method")
+  cfg.UseProxy, _ = cmd.Flags().GetBool("use-proxy")
   cfg.Wordlist, _ = cmd.Flags().GetString("wordlist")
   cfg.HeadersPath, _ = cmd.Flags().GetString("headers-file")
   
@@ -75,7 +76,7 @@ func ParseConfig(cfg Config) (Config, error) {
     if err != nil {
       return cfg, fmt.Errorf("error reading wordlist: %v", err)
     }
-    cfg.Value = wordlistValues
+    cfg.Values = wordlistValues
 
   } else if cfg.Range != "" {
     rangeValues, err := parseRange(cfg.Range)
@@ -83,11 +84,11 @@ func ParseConfig(cfg Config) (Config, error) {
     if err != nil {
       return cfg, fmt.Errorf("error parsing range: %v", err)
     } 
-    cfg.Value = rangeValues
+    cfg.Values = rangeValues
 
   } else {
       return cfg, errors.New("either a range or wordlist must be provided")
-    }
+  }
 
   return cfg, nil
 }

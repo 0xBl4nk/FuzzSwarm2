@@ -3,10 +3,9 @@ package cmd
 import (
 	"os"
 
+	"github.com/0xBl4nk/FuzzSwarm2/src"
 	"github.com/spf13/cobra"
 )
-
-
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -16,7 +15,11 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) { 
-    println("Hello tester")
+    config, err := src.LoadConfig(cmd)
+    if err != nil {
+      src.LogFatal("Failed to load configuration: %v", err)
+    }
+    src.StartFuzzing(config)
   },
 }
 
@@ -30,15 +33,8 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.FuzzSwarm2.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+  rootCmd.Flags().StringP("url", "u", "", "The target URL.")
+  rootCmd.Flags().StringP("method", "X", "", "The target URL.")
 }
 
 

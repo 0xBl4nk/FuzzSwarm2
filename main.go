@@ -1,6 +1,6 @@
 package main
 
-import "github.com/ArthurHydr/FuzzSwarm2/cmd"
+import "github.com/0xBl4nk/FuzzSwarm2/cmd"
 
 func main() {
 	cmd.Execute()

@@ -1,37 +1,40 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
-package cmd
+package src
 
 import (
-	"fmt"
-
-	"github.com/spf13/cobra"
-
-  "github.com/ArthurHydr/FuzzSwarm2"
+    "net/http"
 )
 
-// reqCmd represents the req command
-var reqCmd = &cobra.Command{
-	Use:   "req",
-	Short: "A brief description of your command",
-	Long: `req`,
-	Run: func(cmd *cobra.Command, args []string) {
-		NewRequest()
-	},
+// Request representa uma requisição HTTP básica
+type Request struct {
+    Method  string            // Método HTTP, por exemplo, "GET", "POST"
+    URL     string            // URL para a qual a requisição será feita
+    Headers http.Header       // Headers da requisição
+    Body    []byte            // Corpo da requisição (opcional, usado em POST, PUT, etc.)
 }
 
-func init() {
-	rootCmd.AddCommand(reqCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// reqCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// reqCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+// Função para criar uma nova requisição
+func NewRequest(method, url string) *Request {
+    return &Request{
+        Method:  method,
+        URL:     url,
+        Headers: make(http.Header),
+    }
 }
+
+func MakeRequest() {
+    // Exemplo de criação de uma requisição GET
+    req := NewRequest("GET", "https://api.exemplo.com/dados")
+    req.Headers.Set("Content-Type", "application/json")
+    req.Headers.Set("Authorization", "Bearer seu_token_aqui")
+
+    // Aqui você pode adicionar lógica para enviar a requisição usando o pacote net/http
+    // Por enquanto, apenas imprimimos os detalhes da requisição
+    println("Método:", req.Method)
+    println("URL:", req.URL)
+    for key, values := range req.Headers {
+        for _, value := range values {
+            println("Header:", key, "=", value)
+        }
+    }
+}
+

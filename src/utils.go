@@ -5,6 +5,7 @@ import (
     "fmt"
     "os"
     "strings"
+    "strconv"
 )
 
 // ReadHeaders reads an HTTP headers file, ignoring empty lines and comments.
@@ -40,7 +41,7 @@ func ReadHeaders(path string) (map[string]string, error) {
 }
 
 // ReadValues reads a wordlist file for fuzzing, ignoring empty lines and comments.
-func ReadValues(path string) ([]string, error) {
+func ReadWordlistValues(path string) ([]string, error) {
     file, err := os.Open(path)
     if err != nil {
         return nil, err
@@ -65,3 +66,33 @@ func ReadValues(path string) ([]string, error) {
 
     return values, nil
 }
+
+// Generates a slice of strings based on the provided range string
+func parseRange(rangeStr string) ([]string, error) {
+    parts := strings.Split(rangeStr, ",")
+    if len(parts) != 2 {
+        return nil, fmt.Errorf("range format should be start-end,digits (e.g., 1-10000,3)")
+    }
+    rangeParts := strings.Split(parts[0], "-")
+    if len(rangeParts) != 2 {
+        return nil, fmt.Errorf("range bounds format should be start-end")
+    }
+    start, err := strconv.Atoi(rangeParts[0])
+    if err != nil {
+        return nil, fmt.Errorf("invalid start value: %v", err)
+    }
+    end, err := strconv.Atoi(rangeParts[1])
+    if err != nil {
+        return nil, fmt.Errorf("invalid end value: %v", err)
+    }
+    digits, err := strconv.Atoi(parts[1])
+    if err != nil {
+        return nil, fmt.Errorf("invalid digits value: %v", err)
+    }
+
+    var values []string
+    for i := start; i <= end; i++ {
+        values = append(values, fmt.Sprintf("%0*d", digits, i))
+    }
+    return values, nil
+  }

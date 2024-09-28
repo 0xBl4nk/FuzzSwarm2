@@ -30,9 +30,9 @@ To run FuzzSwarm, use the following syntax:
 ### Example Usage:
 
 ```bash
-./fuzzswarm -R 1-10000,3 -t 10 -X POST -d "param=FUZZ"-u http://192.168.1.35:5000/api/test -f 34 -v
+./FuzzSwarm -X POST --url http://example.com --range 1-10000,1 --data '{"number": FUZZ}' -H "Content-Type: application/json" -f 34 -v
 ```
-<img src="https://i.imgur.com/8sf7iLI.png">
+<img src="https://i.imgur.com/guvTo1Y.png">
 
 ### Available Parameters:
 

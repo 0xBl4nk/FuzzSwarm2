@@ -1,6 +1,6 @@
 # FuzzSwarm
 
-**FuzzSwarm** is a fuzzing tool designed for brute-forcing HTTP endpoints. It supports optional proxy usage, SSL configuration, and response size filtering to focus on significant results.
+**FuzzSwarm** is an advanced fuzzing tool designed to brute-force HTTP endpoints and uncover vulnerabilities in web applications and APIs. It efficiently handles large-scale testing through multi-threaded fuzzing, offering support for both GET and POST requests. Users can inject custom headers and even load headers from a file for more controlled tests. FuzzSwarm also allows precise brute-forcing by specifying numeric ranges, filtering responses by size to focus on significant results, and controlling rate limits and timeouts to ensure safe and measured testing. Additionally, it offers optional proxy usage and SSL configuration for secure environments, along with wordlist support for custom payloads. This makes FuzzSwarm a robust and versatile tool for pentesters, bug bounty hunters, and security professionals looking to expose security flaws in various web environments.
 
 ## 📃 Requirements
 

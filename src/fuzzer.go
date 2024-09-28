@@ -67,7 +67,7 @@ func FuzzRequest(cfg Config, client *http.Client, value string) {
     }
 
     resp, err = client.Do(req)
-    if err != nil {
+    if err == nil {
       break
     }
     LogError("Request failed for value '%s' on attempt %d: %v", value, attempt, err)
@@ -104,9 +104,9 @@ func printResponse(cfg Config, value string, statusCode int, responseSize int, r
     if len(responseBody) > previewLength {
       responseBody = responseBody[:previewLength] + "..."
     }
-    colorFunc.Printf("Value: %s [%d] - Responsesize %d - Preview: %s\n", value, statusCode, responseSize, responseBody)
+    colorFunc.Printf("Value: %s [%d] - Response size: %d - Preview: %s\n", value, statusCode, responseSize, responseBody)
   } else {
-    colorFunc.Printf("Value: %s [%d] - Responsesize %d\n", value, statusCode, responseSize)
+    colorFunc.Printf("Value: %s [%d] - Response size: %d\n", value, statusCode, responseSize)
   }
 }
 

@@ -115,6 +115,6 @@ func parseRange(rangeStr string) ([]string, error) {
     }
 
     if req.Header.Get("Content-Type") == "" {
-        req.Header.Set("Content-Type", "application/json")
+        req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
     }
 }

@@ -38,6 +38,9 @@ To run FuzzSwarm, use the following syntax:
 ```
 <img src="https://i.imgur.com/guvTo1Y.png">
 
+### Scripts Usage
+<img src="https://i.imgur.com/1rjekSu.png">
+
 ### Available Parameters:
 
 ```
@@ -50,6 +53,7 @@ Flags:
   -X, --method string         HTTP method to use: GET or POST. (Default: GET) (default "GET")
   -R, --range string          Range of numbers to use, format start-end,digits (e.g., 1-10000,3).
       --rate-limit int        Rate limit in milliseconds between requests.
+      --script string         Use FuzzSwarm sripts.
   -t, --threads int           Number of threads to use for fuzzing. (default 10)
       --timeout int           Set timeout. (default 10)
   -u, --url string            The target URL.

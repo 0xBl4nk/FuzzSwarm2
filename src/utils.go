@@ -2,10 +2,11 @@ package src
 
 import (
     "bufio"
-    "fmt"
     "os"
+    "fmt"
     "strings"
     "strconv"
+    "net/http"
 )
 
 // ReadHeaders reads an HTTP headers file, ignoring empty lines and comments.
@@ -96,3 +97,24 @@ func parseRange(rangeStr string) ([]string, error) {
     }
     return values, nil
   }
+
+  func ApplyHeaders(cfg Config, req *http.Request) {
+    if cfg.Headers != "" {
+        headers := strings.Split(cfg.Headers, ",")
+        
+        for _, header := range headers {
+            parts := strings.SplitN(header, ":", 2)
+            if len(parts) == 2 {
+                key := strings.TrimSpace(parts[0])
+                value := strings.TrimSpace(parts[1])
+                req.Header.Set(key, value)
+            } else {
+                LogError("Invalid header format: %s", header)
+            }
+        }
+    }
+
+    if req.Header.Get("Content-Type") == "" {
+        req.Header.Set("Content-Type", "application/json")
+    }
+}

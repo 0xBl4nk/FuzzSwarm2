@@ -38,6 +38,9 @@ To run FuzzSwarm, use the following syntax:
 ```
 <img src="https://i.imgur.com/guvTo1Y.png">
 
+### Example Scripts Usage:
+<img src="https://i.imgur.com/1rjekSu.png">
+
 ### Available Parameters:
 
 ```

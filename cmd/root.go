@@ -8,13 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "FuzzSwarm",
-	Short: "A brief description of your application",
-	Long: `.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
+	Short: "FuzzSwarm is a fuzzing tool designed for brute-forcing HTTP endpoints.",
+	Long: `FuzzSwarm is a fuzzing tool designed for brute-forcing HTTP endpoints. It supports optional proxy usage, SSL configuration, and response size filtering to focus on significant results. `,
 	Run: func(cmd *cobra.Command, args []string) { 
     
     err := godotenv.Load()
@@ -35,8 +32,6 @@ var rootCmd = &cobra.Command{
   },
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {

@@ -1,0 +1,9 @@
+[
+  "{{UNIQUE_NUM*2}}",
+  "{$UNIQUE_NUM*2}",
+  "#set($x=UNIQUE_NUM*2)$x",
+  "<%%=UNIQUE_NUM*2%%>",
+  "${UNIQUE_NUM*2}",
+  "<?=UNIQUE_NUM*2?>",
+  "{{UNIQUE_NUM*2}}<%%=UNIQUE_NUM*2%%>"
+]

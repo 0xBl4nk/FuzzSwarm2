@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/0xBl4nk/FuzzSwarm2/src"
+	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +16,12 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) { 
+    
+    err := godotenv.Load()
+    if err != nil {
+      src.LogFatal("No .env file found or failed to load. Continuing without environment variables.")
+    }
+
     cfg, err := src.LoadConfig(cmd)
     if err != nil {
       src.LogFatal("Failed to load configuration: %v", err)

@@ -3,8 +3,8 @@ package src
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"net/url"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -25,6 +25,8 @@ type Config struct {
   Verbose       bool
   RateLimit     int
   FilterSize    int
+  Headers       string
+  ParsedHeaders map[string]string
 
   HeadersFile   map[string]string
   HeadersPath   string
@@ -46,6 +48,7 @@ func LoadConfig(cmd *cobra.Command) (Config, error) {
   cfg.UseProxy, _ = cmd.Flags().GetBool("use-proxy")
   cfg.UseSSL, _ = cmd.Flags().GetBool("use-ssl")
   cfg.Verbose, _ = cmd.Flags().GetBool("verbose")
+  cfg.Headers, _ = cmd.Flags().GetString("headers")
   cfg.Retries = 3
 
  return cfg, nil

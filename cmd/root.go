@@ -41,10 +41,11 @@ func Execute() {
 
 func init() {
   rootCmd.Flags().StringP("url", "u", "", "The target URL.")
+  rootCmd.Flags().StringP("headers", "H", "", "Custom header.")
   rootCmd.Flags().StringP("range", "R", "", "Range of numbers to use, format start-end,digits (e.g., 1-10000,3).")
   rootCmd.Flags().StringP("method", "X", "GET", "HTTP method to use: GET or POST. (Default: GET)")
   rootCmd.Flags().StringP("wordlist", "W", "", "Path to the wordlist file.")
-  rootCmd.Flags().StringP("headers-file", "H", "", "Path to the headers file.")
+  rootCmd.Flags().String("headers-file", "", "Path to the headers file.")
   rootCmd.Flags().String("use-ssl", "", "Enable SSL certificate from .env file.")
   rootCmd.Flags().IntP("threads", "t", 10, "Number of threads to use for fuzzing.")
   rootCmd.Flags().IntP("filter-size", "f", 0, "Filter responses by size (skip responses with this size).")

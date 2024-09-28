@@ -40,8 +40,9 @@ To run FuzzSwarm, use the following syntax:
 Flags:
   -d, --data string           POST data.
   -f, --filter-size int       Filter responses by size (skip responses with this size).
-  -H, --headers-file string   Path to the headers file.
-  -h, --help                  help for FuzzSwarm2
+  -H, --headers string        Custom header.
+      --headers-file string   Path to the headers file.
+  -h, --help                  help for FuzzSwarm
   -X, --method string         HTTP method to use: GET or POST. (Default: GET) (default "GET")
   -R, --range string          Range of numbers to use, format start-end,digits (e.g., 1-10000,3).
       --rate-limit int        Rate limit in milliseconds between requests.
@@ -52,6 +53,7 @@ Flags:
       --use-ssl string        Enable SSL certificate from .env file.
   -v, --verbose               Enable proxy configuration from .env file.
   -W, --wordlist string       Path to the wordlist file.
+
 ```
 
 # How to Generate a Valid SSL Certificate with OpenSSL

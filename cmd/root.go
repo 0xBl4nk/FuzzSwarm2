@@ -43,6 +43,11 @@ func init() {
   rootCmd.Flags().StringP("method", "X", "GET", "HTTP method to use: GET or POST. (Default: GET)")
   rootCmd.Flags().StringP("wordlist", "W", "", "Path to the wordlist file.")
   rootCmd.Flags().StringP("headers-file", "H", "", "Path to the headers file.")
+  rootCmd.Flags().String("use-ssl", "", "Enable SSL certificate from .env file.")
   rootCmd.Flags().IntP("threads", "t", 10, "Number of threads to use for fuzzing.")
-  rootCmd.Flags().Bool("use-proxy", false, "Enable proxy configuration from .env file.")
+  rootCmd.Flags().IntP("filter-size", "f", 0, "Filter responses by size (skip responses with this size).")
+  rootCmd.Flags().Int("timeout", 10, "Set timeout.")
+  rootCmd.Flags().Int("rate-limit", 0, "Rate limit in milliseconds between requests.")
+  rootCmd.Flags().Bool("use-proxy", false, "Display verbose output including response preview.")
+  rootCmd.Flags().BoolP("verbose", "v", false, "Enable proxy configuration from .env file.")
 }

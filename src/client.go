@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func CreateClient(useProxy bool, timeout int, sslCertPath string) *http.Client {
+func CreateClient(useProxy bool, timeout int, useSSL bool) *http.Client {
   transport := &http.Transport{}
 
   if useProxy {
@@ -25,7 +25,12 @@ func CreateClient(useProxy bool, timeout int, sslCertPath string) *http.Client {
     transport.Proxy = http.ProxyURL(proxyURL)
     LogInfo("Using proxy: %s", proxyURL)
 
-    if sslCertPath != "" {
+
+    if useSSL {
+      sslCertPath := os.Getenv("SSL_CERT_PATH")
+      if sslCertPath == "" {
+        LogFatal("SSL-Cert-File is missing in the .env file.")
+      }
       cert, err := tls.LoadX509KeyPair(sslCertPath, sslCertPath)
       if err != nil {
         LogFatal("Failed to load SSL certificate from %s: %v", sslCertPath, err)

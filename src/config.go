@@ -19,6 +19,12 @@ type Config struct {
   Values        []string
   UseProxy      bool
   Threads       int
+  UseSSL        bool
+  Timeout       int
+  Retries       int
+  Verbose       bool
+  RateLimit     int
+  FilterSize    int
 
   HeadersFile   map[string]string
   HeadersPath   string
@@ -32,10 +38,16 @@ func LoadConfig(cmd *cobra.Command) (Config, error) {
   cfg.Threads, _ = cmd.Flags().GetInt("threads")
   cfg.Range, _ = cmd.Flags().GetString("range")
   cfg.Method, _ = cmd.Flags().GetString("method")
-  cfg.UseProxy, _ = cmd.Flags().GetBool("use-proxy")
   cfg.Wordlist, _ = cmd.Flags().GetString("wordlist")
   cfg.HeadersPath, _ = cmd.Flags().GetString("headers-file")
-  
+  cfg.Timeout, _ = cmd.Flags().GetInt("timeout")
+  cfg.FilterSize, _ = cmd.Flags().GetInt("filter-size")
+  cfg.RateLimit, _ = cmd.Flags().GetInt("rate-limit")
+  cfg.UseProxy, _ = cmd.Flags().GetBool("use-proxy")
+  cfg.UseSSL, _ = cmd.Flags().GetBool("use-ssl")
+  cfg.Verbose, _ = cmd.Flags().GetBool("verbose")
+  cfg.Retries = 3
+
  return cfg, nil
 }
 

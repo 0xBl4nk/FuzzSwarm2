@@ -10,7 +10,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "FuzzSwarm2",
+	Use:   "FuzzSwarm",
 	Short: "A brief description of your application",
 	Long: `.`,
 	// Uncomment the following line if your bare application
@@ -57,4 +57,5 @@ func init() {
   rootCmd.Flags().Int("rate-limit", 0, "Rate limit in milliseconds between requests.")
   rootCmd.Flags().Bool("use-proxy", false, "Display verbose output including response preview.")
   rootCmd.Flags().BoolP("verbose", "v", false, "Enable proxy configuration from .env file.")
+  rootCmd.Flags().StringP("data", "d", "", "POST data.")
 }

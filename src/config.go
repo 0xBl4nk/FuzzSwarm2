@@ -16,6 +16,7 @@ type Config struct {
   Data          string
   Range         string
   Wordlist      string
+  Script        string
   Values        []string
   UseProxy      bool
   Threads       int
@@ -50,6 +51,7 @@ func LoadConfig(cmd *cobra.Command) (Config, error) {
   cfg.Verbose, _ = cmd.Flags().GetBool("verbose")
   cfg.Headers, _ = cmd.Flags().GetString("headers")
   cfg.Retries = 3
+  cfg.Script, _ = cmd.Flags().GetString("script")
 
  return cfg, nil
 }
@@ -87,25 +89,29 @@ func ParseConfig(cfg Config) (Config, error) {
     cfg.HeadersFile = headersFile
   }
 
-  // Validate Wordlist and Range.
-  if cfg.Wordlist != "" {
-    wordlistValues, err := ReadWordlistValues(cfg.Wordlist)
-    if err != nil {
-      return cfg, fmt.Errorf("error reading wordlist: %v", err)
-    }
-    cfg.Values = wordlistValues
-
-  } else if cfg.Range != "" {
-    rangeValues, err := parseRange(cfg.Range)
-    
-    if err != nil {
-      return cfg, fmt.Errorf("error parsing range: %v", err)
-    } 
-    cfg.Values = rangeValues
+  // Validate if script != ""
+  if cfg.Script != ""{
 
   } else {
-      return cfg, errors.New("either a range or wordlist must be provided")
-  }
+  // Validate Wordlist and Range.
+    if cfg.Wordlist != "" {
+      wordlistValues, err := ReadWordlistValues(cfg.Wordlist)
+      if err != nil {
+        return cfg, fmt.Errorf("error reading wordlist: %v", err)
+      }
+      cfg.Values = wordlistValues
 
+    } else if cfg.Range != "" {
+      rangeValues, err := parseRange(cfg.Range)
+      
+      if err != nil {
+        return cfg, fmt.Errorf("error parsing range: %v", err)
+      } 
+      cfg.Values = rangeValues
+
+    } else {
+        return cfg, errors.New("either a range or wordlist must be provided")
+    }
+}
   return cfg, nil
 }

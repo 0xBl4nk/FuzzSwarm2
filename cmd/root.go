@@ -3,17 +3,21 @@ package cmd
 import (
 	"os"
 
+	"github.com/0xBl4nk/FuzzSwarm2/scripts"
 	"github.com/0xBl4nk/FuzzSwarm2/src"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
+var script string
+
 var rootCmd = &cobra.Command{
-	Use:   "FuzzSwarm",
+  Use:   "FuzzSwarm",
 	Short: "FuzzSwarm is a fuzzing tool designed for brute-forcing HTTP endpoints.",
 	Long: `FuzzSwarm is a fuzzing tool designed for brute-forcing HTTP endpoints. It supports optional proxy usage, SSL configuration, and response size filtering to focus on significant results. `,
 	Run: func(cmd *cobra.Command, args []string) { 
-    
+   
+
     err := godotenv.Load()
     if err != nil {
       src.LogFatal("No .env file found or failed to load. Continuing without environment variables.")
@@ -27,6 +31,10 @@ var rootCmd = &cobra.Command{
     cfg, err = src.ParseConfig(cfg)
     if err != nil {
       src.LogFatal("Failed to validate configuration: %v", err)
+    }
+
+    if script != ""{
+      scripts.InitScripts(script, &cfg)
     }
     src.StartFuzzing(cfg)
   },
@@ -54,4 +62,6 @@ func init() {
   rootCmd.Flags().Bool("use-proxy", false, "Display verbose output including response preview.")
   rootCmd.Flags().BoolP("verbose", "v", false, "Enable proxy configuration from .env file.")
   rootCmd.Flags().StringP("data", "d", "", "POST data.")
+
+  rootCmd.Flags().StringVar(&script, "script", "", "Use FuzzSwarm sripts.")
 }

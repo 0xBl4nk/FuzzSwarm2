@@ -98,15 +98,18 @@ func parseRange(rangeStr string) ([]string, error) {
     return values, nil
   }
 
-  func ApplyHeaders(cfg Config, req *http.Request) {
+func ApplyHeaders(cfg Config, req *http.Request, fuzzValue string) {
+    // Replace 'FUZZ' in headers provided via command line
     if cfg.Headers != "" {
         headers := strings.Split(cfg.Headers, ",")
-        
         for _, header := range headers {
             parts := strings.SplitN(header, ":", 2)
             if len(parts) == 2 {
                 key := strings.TrimSpace(parts[0])
                 value := strings.TrimSpace(parts[1])
+                // Replace 'FUZZ' placeholder in key and value
+                key = strings.ReplaceAll(key, "FUZZ", fuzzValue)
+                value = strings.ReplaceAll(value, "FUZZ", fuzzValue)
                 req.Header.Set(key, value)
             } else {
                 LogError("Invalid header format: %s", header)
@@ -114,6 +117,17 @@ func parseRange(rangeStr string) ([]string, error) {
         }
     }
 
+    // Replace 'FUZZ' in headers from headers file
+    if len(cfg.HeadersFile) > 0 {
+        for key, value := range cfg.HeadersFile {
+            // Replace 'FUZZ' placeholder in key and value
+            key = strings.ReplaceAll(key, "FUZZ", fuzzValue)
+            value = strings.ReplaceAll(value, "FUZZ", fuzzValue)
+            req.Header.Set(key, value)
+        }
+    }
+
+    // Set default Content-Type header if not already set
     if req.Header.Get("Content-Type") == "" {
         req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
     }

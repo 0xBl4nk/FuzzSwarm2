@@ -56,7 +56,7 @@ func FuzzRequest(cfg Config, client *http.Client, value string) {
     }
   }
 
- ApplyHeaders(cfg, req) 
+ ApplyHeaders(cfg, req, value) 
 
   var resp *http.Response
   for attempt := 1; attempt <= cfg.Retries; attempt++ {

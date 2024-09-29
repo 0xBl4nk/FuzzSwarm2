@@ -54,7 +54,7 @@ func init() {
   rootCmd.Flags().StringP("method", "X", "GET", "HTTP method to use: GET or POST. (Default: GET)")
   rootCmd.Flags().StringP("wordlist", "W", "", "Path to the wordlist file.")
   rootCmd.Flags().String("headers-file", "", "Path to the headers file.")
-  rootCmd.Flags().String("use-ssl", "", "Enable SSL certificate from .env file.")
+  rootCmd.Flags().Bool("use-ssl", false, "Enable SSL certificate from .env file.")
   rootCmd.Flags().IntP("threads", "t", 10, "Number of threads to use for fuzzing.")
   rootCmd.Flags().IntP("filter-size", "f", 0, "Filter responses by size (skip responses with this size).")
   rootCmd.Flags().Int("timeout", 10, "Set timeout.")

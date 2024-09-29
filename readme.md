@@ -91,6 +91,4 @@ You can use scripts in FuzzSwarm to automate specific attack types, such as SSTI
 [repo_wiki_url]: https://0xbl4nk.github.io/FuzzSwarm2-wiki/
 [repo_wiki_img]: https://img.shields.io/badge/docs-wiki_page-blue?style=for-the-badge&logo=none
 [repo_wiki_faq_url]: https://0xbl4nk.github.io/FuzzSwarm2-wiki/faq/
-<!-- Repository -->
 
-[repo_url]: https://github.com/create-go-app/cli

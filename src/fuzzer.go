@@ -6,8 +6,9 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-  "github.com/fatih/color"
+	"context"
+	"sync/atomic"
+	"net/url"
 )
 
 
@@ -16,50 +17,105 @@ func StartFuzzing(cfg Config) {
   LogInfo("Using %d threads", cfg.Threads)
   LogInfo("Total values to fuzz: %d", len(cfg.Values))
 
+  // Create context for graceful cancellation
+  ctx, cancel := context.WithCancel(context.Background())
+  defer cancel()
+
   var wg sync.WaitGroup
   semaphore := make(chan struct{}, cfg.Threads)
-  client := CreateClient(cfg.UseProxy, cfg.Timeout, cfg.UseSSL)
+  client := CreateClient(cfg.UseProxy, cfg.Timeout, cfg.UseSSL, cfg.FollowRedirects)
+
+  // Progress tracking
+  var completed int64
+  total := int64(len(cfg.Values))
+  
+  // Progress reporter goroutine
+  go func() {
+    ticker := time.NewTicker(5 * time.Second)
+    defer ticker.Stop()
+    
+    for {
+      select {
+      case <-ticker.C:
+        current := atomic.LoadInt64(&completed)
+        if current > 0 {
+          percentage := float64(current) / float64(total) * 100
+          LogInfo("Progress: %d/%d (%.1f%%) completed", current, total, percentage)
+        }
+      case <-ctx.Done():
+        return
+      }
+    }
+  }()
 
   for _, value := range cfg.Values {
-    semaphore <- struct{}{}
-    wg.Add(1)
-    go func (val string) {
-      defer func() {
-        wg.Done()
-        <- semaphore
-      }()
-      FuzzRequest(cfg, client, val)
-    }(value)
+    select {
+    case <-ctx.Done():
+      LogInfo("Fuzzing cancelled")
+      return
+    case semaphore <- struct{}{}:
+      wg.Add(1)
+      go func (val string) {
+        defer func() {
+          atomic.AddInt64(&completed, 1)
+          wg.Done()
+          <-semaphore
+        }()
+        FuzzRequest(cfg, client, val, ctx)
+      }(value)
+    }
   }
+  
   wg.Wait()
+  LogInfo("Fuzzing completed. Total requests: %d", total)
 }
 
-func FuzzRequest(cfg Config, client *http.Client, value string) {
+func FuzzRequest(cfg Config, client *http.Client, value string, ctx context.Context) {
   var placehold = "FUZZ"
-  requestURL := strings.Replace(cfg.URL, placehold, value, -1)
+  
+  // Safely encode the value for URL usage
+  encodedValue := SafeURLEncode(value)
+  requestURL := strings.Replace(cfg.URL, placehold, encodedValue, -1)
+  
+  // Validate the final URL
+  if _, err := url.Parse(requestURL); err != nil {
+    LogError("Invalid URL after fuzzing for value '%s': %v", value, err)
+    return
+  }
+  
   var req *http.Request
   var err error
 
-  if cfg.Method == "POST" {
+  if cfg.Method == "POST" || cfg.Method == "PUT" || cfg.Method == "PATCH" {
     fuzzedData := strings.ReplaceAll(cfg.Data, placehold, value)
-    req, err = http.NewRequest("POST", requestURL, strings.NewReader(fuzzedData))
+    req, err = http.NewRequestWithContext(ctx, cfg.Method, requestURL, strings.NewReader(fuzzedData))
     if err != nil {
-      LogError("Failed to create POST request for value '%s': %v", value, err)
+      LogError("Failed to create %s request for value '%s': %v", cfg.Method, value, err)
       return
     }
 
   } else {
-    req, err = http.NewRequest("GET", requestURL, nil)
+    req, err = http.NewRequestWithContext(ctx, cfg.Method, requestURL, nil)
     if err != nil {
-      LogError("Failed to create GET request for value '%s': %v", value, err)
+      LogError("Failed to create %s request for value '%s': %v", cfg.Method, value, err)
       return
     }
   }
 
- ApplyHeaders(cfg, req, value) 
+  // Set random User-Agent for stealth
+  req.Header.Set("User-Agent", GetRandomUserAgent())
+  
+  // Apply custom headers
+  ApplyHeaders(cfg, req, value) 
 
   var resp *http.Response
   for attempt := 1; attempt <= cfg.Retries; attempt++ {
+    select {
+    case <-ctx.Done():
+      return
+    default:
+    }
+    
     if cfg.RateLimit > 0 {
       time.Sleep(time.Millisecond * time.Duration(cfg.RateLimit))
     }
@@ -69,7 +125,18 @@ func FuzzRequest(cfg Config, client *http.Client, value string) {
       break
     }
     LogError("Request failed for value '%s' on attempt %d: %v", value, attempt, err)
-    time.Sleep(time.Second * time.Duration(attempt)) // Exponential backoff
+    
+    // Exponential backoff
+    backoffTime := time.Duration(attempt*attempt) * time.Second
+    if backoffTime > 30*time.Second {
+      backoffTime = 30 * time.Second
+    }
+    
+    select {
+    case <-time.After(backoffTime):
+    case <-ctx.Done():
+      return
+    }
   }
 
   if err != nil {
@@ -95,26 +162,29 @@ func FuzzRequest(cfg Config, client *http.Client, value string) {
 }
 
 func printResponse(cfg Config, value string, statusCode int, responseSize int, responseBody string) {
-  colorFunc := getColorFunc(statusCode)
+  // Sanitize output for security
+  sanitizedValue := SanitizeLogOutput(value)
+  sanitizedBody := SanitizeLogOutput(responseBody)
 
+  result := Result{
+    Value:        sanitizedValue,
+    StatusCode:   statusCode,
+    ResponseSize: responseSize,
+    URL:          cfg.URL,
+    Method:       cfg.Method,
+    Timestamp:    time.Now().Format("2006-01-02T15:04:05Z"),
+  }
+  
   if cfg.Verbose {
     previewLength := 100
-    if len(responseBody) > previewLength {
-      responseBody = responseBody[:previewLength] + "..."
+    if len(sanitizedBody) > previewLength {
+      result.Preview = sanitizedBody[:previewLength] + "..."
+    } else {
+      result.Preview = sanitizedBody
     }
-    colorFunc.Printf("Value: %s [%d] - Response size: %d - Preview: %s\n", value, statusCode, responseSize, responseBody)
-  } else {
-    colorFunc.Printf("Value: %s [%d] - Response size: %d\n", value, statusCode, responseSize)
   }
+  
+  LogResult(cfg, result)
 }
 
-func getColorFunc(statusCode int) *color.Color {
-  switch {
-  case statusCode >= 200 && statusCode < 300:
-      return color.New(color.FgGreen)
-  case statusCode >= 300 && statusCode < 400:
-    return color.New(color.FgYellow)
-  default:
-    return color.New(color.FgRed)
-  }
-}
+

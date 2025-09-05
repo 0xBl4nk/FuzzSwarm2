@@ -7,6 +7,8 @@ import (
     "strings"
     "strconv"
     "net/http"
+    "net/url"
+    "unicode/utf8"
 )
 
 // ReadHeaders reads an HTTP headers file, ignoring empty lines and comments.
@@ -98,7 +100,44 @@ func parseRange(rangeStr string) ([]string, error) {
     return values, nil
   }
 
+// SafeURLEncode safely encodes a value for use in URLs, preventing injection attacks
+func SafeURLEncode(value string) string {
+    // Validate UTF-8 encoding
+    if !utf8.ValidString(value) {
+        LogError("Invalid UTF-8 encoding in payload: %s", value)
+        return url.QueryEscape(strings.ToValidUTF8(value, ""))
+    }
+    return url.QueryEscape(value)
+}
+
+// SanitizeLogOutput removes potentially sensitive information from log output
+func SanitizeLogOutput(input string) string {
+    // Remove common authentication patterns from logs
+    patterns := []string{
+        `password["\s]*[:=]["\s]*[^"\s&]+`,
+        `token["\s]*[:=]["\s]*[^"\s&]+`,
+        `key["\s]*[:=]["\s]*[^"\s&]+`,
+        `secret["\s]*[:=]["\s]*[^"\s&]+`,
+    }
+    
+    result := input
+    for _, pattern := range patterns {
+        // Replace sensitive data with placeholder
+        result = strings.ReplaceAll(result, pattern, "[REDACTED]")
+    }
+    
+    // Limit output length to prevent log flooding
+    if len(result) > 500 {
+        result = result[:500] + "...[TRUNCATED]"
+    }
+    
+    return result
+}
+
 func ApplyHeaders(cfg Config, req *http.Request, fuzzValue string) {
+    // Safely encode fuzz value for headers
+    safeFuzzValue := SanitizeHeaderValue(fuzzValue)
+    
     // Replace 'FUZZ' in headers provided via command line
     if cfg.Headers != "" {
         headers := strings.Split(cfg.Headers, ",")
@@ -107,9 +146,16 @@ func ApplyHeaders(cfg Config, req *http.Request, fuzzValue string) {
             if len(parts) == 2 {
                 key := strings.TrimSpace(parts[0])
                 value := strings.TrimSpace(parts[1])
+                
+                // Validate header key
+                if !isValidHeaderName(key) {
+                    LogError("Invalid header name: %s", key)
+                    continue
+                }
+                
                 // Replace 'FUZZ' placeholder in key and value
-                key = strings.ReplaceAll(key, "FUZZ", fuzzValue)
-                value = strings.ReplaceAll(value, "FUZZ", fuzzValue)
+                key = strings.ReplaceAll(key, "FUZZ", safeFuzzValue)
+                value = strings.ReplaceAll(value, "FUZZ", safeFuzzValue)
                 req.Header.Set(key, value)
             } else {
                 LogError("Invalid header format: %s", header)
@@ -120,9 +166,15 @@ func ApplyHeaders(cfg Config, req *http.Request, fuzzValue string) {
     // Replace 'FUZZ' in headers from headers file
     if len(cfg.HeadersFile) > 0 {
         for key, value := range cfg.HeadersFile {
+            // Validate header key
+            if !isValidHeaderName(key) {
+                LogError("Invalid header name from file: %s", key)
+                continue
+            }
+            
             // Replace 'FUZZ' placeholder in key and value
-            key = strings.ReplaceAll(key, "FUZZ", fuzzValue)
-            value = strings.ReplaceAll(value, "FUZZ", fuzzValue)
+            key = strings.ReplaceAll(key, "FUZZ", safeFuzzValue)
+            value = strings.ReplaceAll(value, "FUZZ", safeFuzzValue)
             req.Header.Set(key, value)
         }
     }
@@ -131,4 +183,36 @@ func ApplyHeaders(cfg Config, req *http.Request, fuzzValue string) {
     if req.Header.Get("Content-Type") == "" {
         req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
     }
+}
+
+// SanitizeHeaderValue removes dangerous characters from header values
+func SanitizeHeaderValue(value string) string {
+    // Remove control characters and normalize
+    cleaned := strings.Map(func(r rune) rune {
+        if r < 32 || r == 127 {
+            return -1 // Remove control characters
+        }
+        return r
+    }, value)
+    
+    // Limit length to prevent header injection
+    if len(cleaned) > 1024 {
+        cleaned = cleaned[:1024]
+    }
+    
+    return cleaned
+}
+
+// isValidHeaderName checks if a header name is valid according to HTTP specs
+func isValidHeaderName(name string) bool {
+    if name == "" {
+        return false
+    }
+    
+    for _, char := range name {
+        if char < 33 || char > 126 || char == ':' {
+            return false
+        }
+    }
+    return true
 }

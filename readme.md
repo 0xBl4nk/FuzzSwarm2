@@ -39,6 +39,35 @@ is to read the project [Wiki][repo_wiki_url].
 Yes, the most frequently asked questions (FAQ) are also
 [here][repo_wiki_faq_url].
 
+## 🔧 Recent Improvements for Cybersecurity Professionals
+
+**Security Enhancements:**
+- ✅ Enhanced URL validation and sanitization to prevent SSRF attacks
+- ✅ User-agent randomization for stealth testing
+- ✅ Improved SSL/TLS configuration with enforced minimum TLS 1.2
+- ✅ Input sanitization for headers and payloads
+- ✅ Secure logging with sensitive data redaction
+
+**Performance & Reliability:**
+- ✅ HTTP connection pooling for better performance
+- ✅ Exponential backoff retry mechanism
+- ✅ Context-based cancellation for graceful shutdown
+- ✅ Progress tracking for long-running scans
+- ✅ Memory usage optimization
+
+**Professional Features:**
+- ✅ Multiple output formats: text (colored), JSON, CSV
+- ✅ Support for additional HTTP methods: PUT, DELETE, PATCH
+- ✅ Configurable redirect following
+- ✅ Advanced request filtering and response analysis
+- ✅ Enhanced script system with SQLi, XSS, and SSTI payloads
+
+**Usability Improvements:**
+- ✅ Comprehensive help documentation with examples
+- ✅ Better error messages and validation
+- ✅ Professional flag descriptions
+- ✅ Expanded payload libraries for common vulnerabilities
+
 ## ⚙️ Commands & Options
 
 ### `POST Example`
@@ -67,15 +96,24 @@ Yes, the most frequently asked questions (FAQ) are also
 
 ### `Scripts Example`
 
-You can use scripts in FuzzSwarm to automate specific attack types, such as SSTI fuzzing, with predefined payloads for more targeted vulnerability testing.
+FuzzSwarm now includes built-in security testing scripts with comprehensive payload libraries for common vulnerabilities:
 
 ```bash
-./FuzzSwam --script ssti -u 'http://127.0.0.1/vulnerable?input=FUZZ' -v
+# SQL Injection Testing
+./FuzzSwarm --script sqli -u 'http://target.com/search?q=FUZZ' -v --output-format json
+
+# Server-Side Template Injection (SSTI) Detection
+./FuzzSwarm --script ssti -u 'http://target.com/template?input=FUZZ' -v
+
+# Cross-Site Scripting (XSS) Testing
+./FuzzSwarm --script xss -u 'http://target.com/comment?text=FUZZ' -f 200 -v
 ```
 
 | Option | Description                                                                                            | Type   | Default | Required? |
 | ------ | ------------------------------------------------------------------------------------------------------ | ------ | ------- | --------- |
-| `--script`   | Select the script to use | `string` | | No |
+| `--script`   | Security testing script: **ssti**, **sqli**, **xss** | `string` | | No |
+| `--output-format` | Output format: **text**, **json**, **csv** | `string` | text | No |
+| `--follow-redirects` | Follow HTTP redirects | `bool` | true | No |
 
 ![cgapp_deploy](https://i.imgur.com/1rjekSu.png)
 
